@@ -132,27 +132,7 @@ def run_script():
         script.script, request.json.get("input_data", {})
     )
 
-    if isinstance(result, dict) and "output" in result and "result" in result:
-        return (
-            jsonify(
-                {
-                    "message": "Script execution completed",
-                    "output": result["output"],
-                    "result": result["result"],
-                }
-            ),
-            200,
-        )
-    else:
-        return (
-            jsonify(
-                {
-                    "message": "Script execution completed",
-                    "error": "Unexpected result format",
-                }
-            ),
-            500,
-        )
+    return jsonify(result["result"]), 200
 
 
 # Example default route to check server is running
@@ -171,7 +151,7 @@ def handle_exit():
 def test_upload_video():
     app.logger.info("Testing video upload")
 
-    with open("video_cache/test_example.mp4", "rb") as f:
+    with open("video_cache/insta_auth_test.mp4", "rb") as f:
         test_video_content = f.read()
 
     with app.test_client() as client:
@@ -202,11 +182,11 @@ if __name__ == "__main__":
         # app.run(host="0.0.0.0", port=5050, debug=False)
 
         # print("Starting upload test")
-        # test_upload_video()
-        test_run_script(
-            script_id="47a8a887-d212-47c3-9b5d-7c19a1597667",
-            input_data={"github_url": "https://github.com/charlesmaddock/fishards"},
-        )
+        test_upload_video()
+        # test_run_script(
+        #     script_id="ccfa7cc8-7500-4231-aeb2-a390e812e71f",
+        #     input_data={"github_url": "https://github.com/charlesmaddock/fishards"},
+        # )
     except Exception as e:
         print(e)
     finally:

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Recorder",
+  "version": "1.0",
+  "description": "Records the current tab in Chrome",
+  "permissions": ["tabs", "activeTab", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
