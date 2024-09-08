@@ -59,6 +59,8 @@ const ScriptsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const startScript = async (id: string, data: any) => {
     try {
+      // parse the input data
+      data = JSON.parse(data);
       await axios.post('http://localhost:5050/run_script', {
         script_id: id,
         input_data: data
