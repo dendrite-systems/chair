@@ -1,19 +1,13 @@
 from flask import Flask, request, jsonify
 import os, time
-<<<<<<< HEAD
-=======
-# import cv2
->>>>>>> a7a58cd571163e83781bf5563d513046a2fac427
 from flask_cors import CORS
 import base64
-import json
+from werkzeug.datastructures import FileStorage
+from io import BytesIO
 
-<<<<<<< HEAD
-from server.code_execution.Sandbox import PythonSandbox
-=======
-from lm.lm_utils import start_agent_prompt_file_response_thread
-# from code_execution.Sandbox import PythonSandbox
->>>>>>> a7a58cd571163e83781bf5563d513046a2fac427
+from code_execution.Sandbox import PythonSandbox
+from llm.llm_utils import create_dendrite_script_from_video
+from db.db import get_all_scripts, get_script_by_id
 
 video_save_dir = "video_cache"
 script_dir = "parsed_scripts"
@@ -41,32 +35,43 @@ os.makedirs(video_save_dir, exist_ok=True)
 
 @app.route("/upload_video", methods=["POST"])
 def upload_video():
+    app.logger.info("Received video upload request")
+
     # Check if the request contains a file
     if "video" not in request.files and (
         not request.json or "video_base64" not in request.json
     ):
+        app.logger.error("No video file provided in the request")
         return jsonify({"error": "No video file provided"}), 400
 
     # Generate a timestamped filename
     timestamp = int(time.time())
     filename = f"{timestamp}.mp4"
     file_path = os.path.join(video_save_dir, filename)
+    app.logger.info(f"Generated filename: {filename}")
 
     if "video" in request.files:
+        app.logger.info("Processing video file from request.files")
         video_file = request.files["video"]
         video_file.save(file_path)
+        app.logger.info(f"Video file saved to {file_path}")
     elif request.json and "video_base64" in request.json:
+        app.logger.info("Processing base64 encoded video from request.json")
         video_base64 = request.json["video_base64"]
         video_data = base64.b64decode(video_base64)
         with open(file_path, "wb") as f:
             f.write(video_data)
+        app.logger.info(f"Decoded base64 video saved to {file_path}")
     else:
+        app.logger.error("No video file provided in the request")
         return jsonify({"error": "No video file provided"}), 400
 
     # Start a thread that will prompt the agent with a file response
-    start_agent_prompt_file_response_thread(filename, file_path)
-    print(request.json)
+    app.logger.info(f"Creating Dendrite script from video: {filename}")
+    create_dendrite_script_from_video(filename, file_path)
+    app.logger.debug(f"Request JSON: {request.json}")
 
+    app.logger.info("Video upload process completed successfully")
     return (
         jsonify({"message": "Video uploaded successfully", "filename": filename}),
         200,
@@ -75,57 +80,57 @@ def upload_video():
 
 @app.route("/get_scripts_list", methods=["GET"])
 def get_scripts_list():
-    # Get the list of scripts
-    scripts = os.listdir(script_dir)
-    return jsonify({"scripts": scripts}), 200
+    scripts = get_all_scripts()
+    script_list = [
+        {"id": script.script_id, "name": script.name} for script in scripts.data
+    ]
+    return jsonify({"scripts": script_list}), 200
 
 
 @app.route("/get_script_details", methods=["GET"])
-def get_script():
-    # Get the requested script
-    script_name = request.args.get("script_name")
-    if script_name is None:
-        return jsonify({"error": "Script name not provided"}), 400
+def get_script_details():
+    script_id = request.args.get("script_id")
+    if script_id is None:
+        return jsonify({"error": "Script ID not provided"}), 400
 
-    script_path = os.path.join(script_dir, script_name)
-
-    if not os.path.exists(script_path):
+    script = get_script_by_id(script_id)
+    if script is None:
         return jsonify({"error": "Script not found"}), 404
 
-    with open(f"{script_path}/config.json", "r") as f:
-        script_config = json.load(f)
-    with open(f"{script_path}/script.py", "r") as f:
-        script_text = f.read()
-
-    return jsonify({"config": script_config, "script": script_text}), 200
+    return (
+        jsonify(
+            {
+                "script_id": script.script_id,
+                "name": script.name,
+                "description": script.description,
+                "code": script.script,
+                "author": script.author,
+                "version": script.version,
+            }
+        ),
+        200,
+    )
 
 
 @app.route("/run_script", methods=["POST"])
 def run_script():
-    # Get the script to run
     if not request.json:
         return jsonify({"error": "Invalid JSON data"}), 400
-    script_name = request.json.get("script_name")
-    if not script_name:
-        return jsonify({"error": "Script name not provided"}), 400
-    script_path = os.path.join(script_dir, script_name)
+    script_id = request.json.get("script_id")
+    if not script_id:
+        return jsonify({"error": "Script ID not provided"}), 400
 
-    if not os.path.exists(script_path):
+    script = get_script_by_id(script_id)
+    if script is None:
         return jsonify({"error": "Script not found"}), 404
-    else:
-        # sandbox = PythonSandbox()
-        sandbox = None
-        raise NotImplementedError
 
-        # Read the script content
-        with open(os.path.join(script_path, "script.py"), "r") as f:
-            script_content = f.read()
-        try:
-            sandbox.execute_with_output(script_content)
-            print("Script ran successfully")
-        except Exception as e:
-            print(f"Error running script: {e}")
-            return jsonify({"error": str(e)}), 500
+    sandbox = PythonSandbox()
+    try:
+        sandbox.execute_with_output(script.script)
+        print("Script ran successfully")
+    except Exception as e:
+        print(f"Error running script: {e}")
+        return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Script running"}), 200
 
@@ -143,9 +148,42 @@ def handle_exit():
         stop_event.set()
 
 
+def test_upload_video():
+    app.logger.info("Testing video upload")
+
+    with open("video_cache/test_example.mp4", "rb") as f:
+        test_video_content = f.read()
+
+    with app.test_client() as client:
+        response = client.post(
+            "/upload_video",
+            data={"video": (BytesIO(test_video_content), "test_example.mp4")},
+            content_type="multipart/form-data",
+        )
+
+    print(f"Test result: {response.get_json()}")
+
+
+def test_run_script(script_id="2aa3579a-753c-4c20-892b-b5d197e5b9e2"):
+    app.logger.info("Testing script execution")
+
+    with app.test_client() as client:
+        response = client.post(
+            "/run_script",
+            json={"script_id": script_id},
+            content_type="application/json",
+        )
+
+    print(f"Test result: {response.get_json()}")
+
+
 if __name__ == "__main__":
     try:
         app.run(host="0.0.0.0", port=5050, debug=False)
+
+        # print("Starting upload test")
+        # test_upload_video()
+        # test_run_script()
     except Exception as e:
         print(e)
     finally:

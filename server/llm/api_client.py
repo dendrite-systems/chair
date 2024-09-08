@@ -1,4 +1,4 @@
-from models.gemini import GeminiModel
+from .models.gemini import GeminiModel
 
 
 class GeminiAPIClient:
