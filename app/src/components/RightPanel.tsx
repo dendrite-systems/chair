@@ -1,90 +1,144 @@
-import React, { useState } from 'react';
-import { Box, Typography, Slider, TextField, FormControlLabel, Switch } from '@mui/material';
+import React, { useContext, useState } from 'react';
+import { Box, Typography, Slider, TextField, FormControlLabel, Switch, Button, IconButton } from '@mui/material';
+
+import StartIcon from '@mui/icons-material/PlayArrow'; // Use the icon you need
+import RefreshIcon from '@mui/icons-material/Refresh'; // Use the refresh icon
+
+import Codeblock from './CodeBlock'
+
 import axios from 'axios';
 
-const controls = [
-    // { name: 'knob1', type: 'slider' },
-    // { name: 'knob2', type: 'slider' },
-    // { name: 'value1', type: 'input' },
-    // { name: 'value2', type: 'input' },
-    { name: 'YOLO', type: 'switch' },
-    { name: 'HandLandmark', type: 'switch' }
-];
+import { ScriptsContext } from '../ScriptsContext';
 
 const RightPanel: React.FC = () => {
-    const [controlValues, setControlValues] = useState<Record<string, any>>({
-        // knob1: 30,
-        // knob2: 70,
-        // value1: '',
-        // value2: '',
-        YOLO: true,
-        HandLandmark: true
-    });
 
-    const handleChange = async (name: string, value: any) => {
-        console.log("Changing control", name, "to", value);
-        await axios.post(`http://localhost:5050/set_control/${name}`, { value });
-        setControlValues(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
+    const context = useContext(ScriptsContext);
+    if (!context) {
+      return <div>Context not found</div>;
+    }
+  
+    const { curScript, scripts, loading, error, reload, chooseCurScript, runScript } = context;
 
     return (
         <Box
+            className="right-panel"
             display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="70vh"
-            padding="16px"
+            flexDirection="column"
+            justifyContent="flex-start"
+            padding="30px 30px 0 30px"
         >
-            <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                justifyContent="flex-start"
-                width="80%"
-                height="80%"
-                padding="30px 0"
-            >
-                <Typography variant="h4" gutterBottom>
-                    Controls
-                </Typography>
-                {controls.map((control) => (
-                    <Box key={control.name} marginBottom="16px" width="100%">
-                        <Typography gutterBottom>
-                            {control.name.charAt(0).toUpperCase() + control.name.slice(1)}
-                        </Typography>
-                        {control.type === 'slider' && (
-                            <Slider
-                                value={controlValues[control.name]}
-                                onChange={(e, value) => handleChange(control.name, value as number)}
-                                aria-labelledby={control.name}
-                            />
-                        )}
-                        {control.type === 'input' && (
-                            <TextField
-                                value={controlValues[control.name]}
-                                onChange={(e) => handleChange(control.name, e.target.value)}
-                                variant="outlined"
-                                fullWidth
-                            />
-                        )}
-                        {control.type === 'switch' && (
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={controlValues[control.name]}
-                                        onChange={(e) => handleChange(control.name, e.target.checked)}
-                                        name={control.name}
-                                    />
+            {
+                curScript !== null ? 
+                <>
+                    <Typography variant="h5" color="secondary" gutterBottom>
+                        {curScript.name}
+                    </Typography>
+                    <Typography variant="body1" color="secondary" gutterBottom>
+                        {curScript.description}
+                    </Typography>
+                    <div className='border-box'
+                        style={{
+                            width: "100%",
+                            height: "2px",
+                            margin: "10px 0"
+                        }}
+                    />
+                    <Codeblock code={curScript.script} />
+                    <div
+                        style={{
+                            padding: "20px 10px",
+                            display:'flex',
+                            flexDirection:'row',
+                            justifyContent:'space-between'
+                        }}
+                    >
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<StartIcon />}
+                            sx={{
+                                width: '47%',
+                                backgroundColor: '#ef6c00', // Orange color
+                                color: 'white',
+                                padding: "20px, 40px",
+                                fontSize: '16px',
+                                '&:hover': {
+                                    backgroundColor: '#ff9800'
+                                },
+                            }}
+                            onClick = {
+                                () => {
+                                    runScript(curScript.id);
                                 }
-                                label={control.name.charAt(0).toUpperCase() + control.name.slice(1)}
-                            />
-                        )}
-                    </Box>
-                ))}
-            </Box>
+                            }
+                        >
+                            Start
+                        </Button>
+                        {/* Refresh Button */}
+                        <Button
+                            variant="contained"
+                            color="inherit"
+                            startIcon={<RefreshIcon />}
+                            sx={{
+                                width: '47%',
+                                padding: "20px, 40px",
+                                backgroundColor: '#f5f5f5', // Light grey
+                                fontSize: '16px',
+
+                                color: '#616161', // Dark grey for the text
+                                '&:hover': {
+                                    backgroundColor: '#e0e0e0', // Slightly darker grey on hover
+                                },
+                            }}
+                            onClick={()=>{reload();}}
+                        >
+                            Refresh
+                        </Button>
+                    </div>
+                </>
+                :
+                <>
+                    <Typography variant="h5" color="secondary" gutterBottom>
+                        Welcome to Smart Chair! Find yours now.
+                    </Typography>
+                    <pre style={{ color: '#ef6c00', fontFamily: 'monospace', fontSize: '11px', fontWeight: '600' }}>
+                        {`
+                       _________________
+                     /                /|
+                    /                / |
+                   /________________/ /|
+                ###|      ____      |//|
+                #   |     /   /|     |/.|
+              #  __|___ /   /.|     |  |_______________
+             #  /      /   //||     |  /              /|                  ___
+            #  /      /___// ||     | /              / |                 / \\ \\
+            # /______/!   || ||_____|/              /  |                /   \\ \\
+            #| . . .  !   || ||                    /  _________________/     \\ \\
+            #|  . .   !   || //      ________     /  /\\________________  {   /  }
+            /|   .    !   ||//~~~~~~/   0000/    /  / / ______________  {   /  /
+           / |        !   |'/      /9  0000/    /  / / /             / {   /  /
+          / #\\________!___|/      /9  0000/    /  / / /_____________/___  /  /
+         / #     /_____\\/        /9  0000/    /  / / /_  /\\_____________\\/  /
+        / #                      \`\`^^^^^^    /   \\ \\ . ./ / ____________   /
+       +=#==================================/     \\ \\ ./ / /.  .  .  \\ /  /
+       |#                                   |      \\ \\/ / /___________/  /
+       #                                    |_______\\__/________________/
+       |                                    |               |  |  / /       
+       |                                    |               |  | / /       
+       |                                    |       ________|  |/ /________       
+       |                                    |      /_______/    \\_________/\\       
+       |                                    |     /        /  /           \\ )       
+       |                                    |    /OO^^^^^^/  / /^^^^^^^^^OO\\)       
+       |                                    |            /  / /        
+       |                                    |           /  / /
+       |                                    |          /___\\/
+       |Chairs!                             |           oo
+       |____________________________________|
+       |____________________________________|
+                        `}
+                    </pre>
+                </>
+            }
         </Box>
     );
 }

@@ -1,6 +1,7 @@
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
+    overflow: hidden;
   }
   
   #root {
@@ -10,3 +11,43 @@ body {
   }
   
   
+  .main-container {
+    margin: 0px, 50px !important;
+    background-color: #616161;
+    height: 100vh;
+  }
+
+  .background {
+    position: fixed;
+    z-index: -1;
+    top: -10vh;
+    left: -10vw;
+    background-color: #616161;
+    height: 120vh;
+    width: 120vw;
+  }
+
+  .right-panel {
+    border-left: 2px solid #858585 !important;
+    height: 100vh;
+  }
+
+  .table-header-cell {
+    font-size: 18px !important ;
+    font-weight: bold !important;
+    color: white !important;
+  }
+
+  .table-content-cell {
+    font-size: 16px !important ;
+    color: white !important;
+  }
+
+  .table-content-row:hover {
+    background-color: #858585 !important;
+  }
+
+  .border-box {
+    border-left: 2px solid #858585 !important;
+    border-top: 2px solid #858585 !important;
+  }

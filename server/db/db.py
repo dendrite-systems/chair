@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
@@ -9,7 +9,7 @@ from datetime import datetime, UTC
 import json
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Initialize Supabase client
 url: str = os.environ["SUPABASE_URL"]
