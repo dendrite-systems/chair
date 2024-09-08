@@ -30,10 +30,6 @@ class PythonSandbox:
             else:
                 print(f"Warning: {var} not found in environment variables")
 
-        # Set Dendrite API key
-        if "DENDRITE_API_KEY" in self.globals:
-            dendrite_sdk.api_key = self.globals["DENDRITE_API_KEY"]
-
     def execute_with_output(self, code):
         output = []
 

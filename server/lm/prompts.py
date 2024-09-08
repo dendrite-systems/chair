@@ -1,7 +1,3 @@
-MODEL_LIBRARY = "GEMINI"
-
-IDLE_RESPONSE_TIME = 7
-
 CODE_PROMPT = """You are an AI agent that takes a screen recording of a user showing you how to complete an automated task on the web.=======
 
 Your goal is to look at the screen recording and generate a python script that uses the Dendrite SDK. Dendrite is an SDK that uses natural language to automate actions on the web.

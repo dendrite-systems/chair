@@ -1,12 +1,9 @@
-from flask import Flask, Response, request, jsonify
+from flask import Flask, request, jsonify
 import os, time
-import cv2
 from flask_cors import CORS
-import threading, queue
 import base64
 import json
 
-from lm.lm_utils import start_agent_prompt_file_response_thread
 from server.code_execution.Sandbox import PythonSandbox
 
 video_save_dir = "video_cache"
@@ -36,7 +33,9 @@ os.makedirs(video_save_dir, exist_ok=True)
 @app.route("/upload_video", methods=["POST"])
 def upload_video():
     # Check if the request contains a file
-    if "video" not in request.files and "video_base64" not in request.json:
+    if "video" not in request.files and (
+        not request.json or "video_base64" not in request.json
+    ):
         return jsonify({"error": "No video file provided"}), 400
 
     # Generate a timestamped filename
@@ -46,9 +45,8 @@ def upload_video():
 
     if "video" in request.files:
         video_file = request.files["video"]
-        # Save the video
         video_file.save(file_path)
-    elif "video_base64" in request.json:
+    elif request.json and "video_base64" in request.json:
         video_base64 = request.json["video_base64"]
         video_data = base64.b64decode(video_base64)
         with open(file_path, "wb") as f:
@@ -59,8 +57,12 @@ def upload_video():
     # Start a thread that will prompt the agent with a file response
     # start_agent_prompt_file_response_thread(filename, file_path)
     print(request.json)
-    
-    return jsonify({"message": "Video uploaded successfully", "filename": filename}), 200
+
+    return (
+        jsonify({"message": "Video uploaded successfully", "filename": filename}),
+        200,
+    )
+
 
 @app.route("/get_scripts_list", methods=["GET"])
 def get_scripts_list():
@@ -73,6 +75,9 @@ def get_scripts_list():
 def get_script():
     # Get the requested script
     script_name = request.args.get("script_name")
+    if script_name is None:
+        return jsonify({"error": "Script name not provided"}), 400
+
     script_path = os.path.join(script_dir, script_name)
 
     if not os.path.exists(script_path):
@@ -89,7 +94,11 @@ def get_script():
 @app.route("/run_script", methods=["POST"])
 def run_script():
     # Get the script to run
+    if not request.json:
+        return jsonify({"error": "Invalid JSON data"}), 400
     script_name = request.json.get("script_name")
+    if not script_name:
+        return jsonify({"error": "Script name not provided"}), 400
     script_path = os.path.join(script_dir, script_name)
 
     if not os.path.exists(script_path):
@@ -120,7 +129,6 @@ def handle_exit():
     # handle cleanup here
     global stop_events
     print("Exiting")
-    cv2.destroyAllWindows()
     for stop_event in stop_events:
         stop_event.set()
 

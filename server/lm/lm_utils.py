@@ -2,21 +2,20 @@ import threading
 import os
 import json
 
-from lm.api import ConversationAgent
-from lm.constants import CODE_PROMPT, ANNOTATE_PROMPT
+from lm.api import GeminiAPIClient
+from server.lm.prompts import CODE_PROMPT, ANNOTATE_PROMPT
 from server.lm.parse_code_output import (
     extract_python_code,
     extract_name_and_description,
 )
 
-agent = ConversationAgent()
+gemini_api_client = GeminiAPIClient()
 
 
 def start_agent_prompt_file_response_thread(file_name, file_path):
     # Start a thread that will prompt the agent with a file response
     def agent_prompt_file_response():
-        print("Prompting agent with file response")
-        response = agent.get_prompt_response_with_file(
+        response = gemini_api_client.get_prompt_response_with_file(
             CODE_PROMPT, file_name, file_path
         )
         code = extract_python_code(response)
@@ -25,7 +24,7 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
             return
 
         annotate_prompt = ANNOTATE_PROMPT.replace("{{SCRIPT}}", code)
-        res = agent.get_response(annotate_prompt)
+        res = gemini_api_client.get_response(annotate_prompt)
         name_and_description = extract_name_and_description(res)
         if name_and_description is None:
             print("Failed to generate name and description")
@@ -36,7 +35,6 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
             "description": name_and_description["description"],
             "code": code,
         }
-        print(res)
 
         # Save the generated script to the parsed_scripts directory
         script_dir = os.path.join("parsed_scripts", res["name"])
