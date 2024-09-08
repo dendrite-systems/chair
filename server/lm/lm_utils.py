@@ -19,6 +19,9 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
         annotate_prompt = ANNOTATE_PROMPT.replace("{{SCRIPT}}", code)
         res = agent.get_response(annotate_prompt)
         name_and_description = extract_name_and_description(res)
+        if name_and_description is None:
+            print("Failed to generate name and description")
+            return
 
         res = {
             "name": name_and_description["name"],
