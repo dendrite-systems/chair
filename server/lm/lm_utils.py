@@ -1,8 +1,13 @@
-import threading, random, time
+import threading
+import os
+import json
 
 from lm.api import ConversationAgent
 from lm.constants import CODE_PROMPT, ANNOTATE_PROMPT
-from server.lm.parse_code_output import parse_code_output, extract_name_and_description
+from server.lm.parse_code_output import (
+    extract_python_code,
+    extract_name_and_description,
+)
 
 agent = ConversationAgent()
 
@@ -14,7 +19,10 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
         response = agent.get_prompt_response_with_file(
             CODE_PROMPT, file_name, file_path
         )
-        code = parse_code_output(response)
+        code = extract_python_code(response)
+        if code is None:
+            print("Failed to generate code")
+            return
 
         annotate_prompt = ANNOTATE_PROMPT.replace("{{SCRIPT}}", code)
         res = agent.get_response(annotate_prompt)
@@ -29,6 +37,26 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
             "code": code,
         }
         print(res)
+
+        # Save the generated script to the parsed_scripts directory
+        script_dir = os.path.join("parsed_scripts", res["name"])
+        os.makedirs(script_dir, exist_ok=True)
+
+        # Save the script
+        with open(os.path.join(script_dir, "script.py"), "w") as f:
+            f.write(res["code"])
+
+        # Save the config
+        config = {
+            "Name": res["name"],
+            "Display Name": res["name"].replace("_", " ").title(),
+            "Author": "AI Generated",
+            "Description": res["description"],
+            "Version Number": "1.0",
+        }
+        with open(os.path.join(script_dir, "config.json"), "w") as f:
+            json.dump(config, f, indent=4)
+
         return res
 
     thread = threading.Thread(target=agent_prompt_file_response)
