@@ -1,0 +1,7 @@
+{
+    "Name": "authenticate_with_instagram",
+    "Display Name": "Authenticate with Instagram",
+    "Author": "Charles Alexander",
+    "Description": "Authenticate with Instagram and save the access token.",
+    "Version Number": "1.0"
+}

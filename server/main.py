@@ -4,10 +4,13 @@ import cv2
 from flask_cors import CORS
 import threading, queue
 import base64
+import json
 
 from lm.lm_utils import start_agent_prompt_file_response_thread
+from server.code_execution.Sandbox import PythonSandbox
 
 video_save_dir = "video_cache"
+script_dir = "parsed_scripts"
 
 stop_events = []
 threads = {}
@@ -60,6 +63,54 @@ def upload_video():
         jsonify({"message": "Video uploaded successfully", "filename": filename}),
         200,
     )
+
+
+@app.route("/get_scripts_list", methods=["GET"])
+def get_scripts_list():
+    # Get the list of scripts
+    scripts = os.listdir(script_dir)
+    return jsonify({"scripts": scripts}), 200
+
+
+@app.route("/get_script_details", methods=["GET"])
+def get_script():
+    # Get the requested script
+    script_name = request.args.get("script_name")
+    script_path = os.path.join(script_dir, script_name)
+
+    if not os.path.exists(script_path):
+        return jsonify({"error": "Script not found"}), 404
+
+    with open(f"{script_path}/config.json", "r") as f:
+        script_config = json.load(f)
+    with open(f"{script_path}/script.py", "r") as f:
+        script_text = f.read()
+
+    return jsonify({"config": script_config, "script": script_text}), 200
+
+
+@app.route("/run_script", methods=["POST"])
+def run_script():
+    # Get the script to run
+    script_name = request.json.get("script_name")
+    script_path = os.path.join(script_dir, script_name)
+
+    if not os.path.exists(script_path):
+        return jsonify({"error": "Script not found"}), 404
+    else:
+        sandbox = PythonSandbox()
+
+        # Read the script content
+        with open(os.path.join(script_path, "script.py"), "r") as f:
+            script_content = f.read()
+        try:
+            sandbox.execute_with_output(script_content)
+            print("Script ran successfully")
+        except Exception as e:
+            print(f"Error running script: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"message": "Script running"}), 200
 
 
 # Example default route to check server is running
