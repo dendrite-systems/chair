@@ -1,7 +1,7 @@
 import threading, random, time
 
 from lm.api import ConversationAgent
-from lm.constants import INITIAL_PROMPT, ANNOTATE_PROMPT
+from lm.constants import CODE_PROMPT, ANNOTATE_PROMPT
 from server.lm.parse_code_output import parse_code_output, extract_name_and_description
 
 agent = ConversationAgent()
@@ -12,7 +12,7 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
     def agent_prompt_file_response():
         print("Prompting agent with file response")
         response = agent.get_prompt_response_with_file(
-            INITIAL_PROMPT, file_name, file_path
+            CODE_PROMPT, file_name, file_path
         )
         code = parse_code_output(response)
 
