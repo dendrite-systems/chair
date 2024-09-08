@@ -4,7 +4,7 @@ import json
 
 from lm.api import GeminiAPIClient
 from server.lm.prompts import CODE_PROMPT, ANNOTATE_PROMPT
-from server.lm.parse_code_output import (
+from server.lm.parse_utils import (
     extract_python_code,
     extract_name_and_description,
 )

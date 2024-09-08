@@ -15,6 +15,7 @@ restrictedpython = {version = ">=7.2,<7.3", python = ">=3.12,<3.13"}
 openai = "^1.44.0"
 python-dotenv = "^1.0.1"
 flask-cors = "^5.0.0"
+supabase = "^2.7.4"
 
 
 [build-system]
