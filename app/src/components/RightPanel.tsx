@@ -43,7 +43,9 @@ const RightPanel: React.FC = () => {
                             margin: "10px 0"
                         }}
                     />
-                    <Codeblock code={curScript.script} />
+                    <Codeblock code={
+                        curScript.script
+                    } />
                     <div
                         style={{
                             padding: "20px 10px",
@@ -103,6 +105,18 @@ const RightPanel: React.FC = () => {
                     </Typography>
                     <pre style={{ color: '#ef6c00', fontFamily: 'monospace', fontSize: '11px', fontWeight: '600' }}>
                         {`
+
+                                   __                  __           
+                                  /  |                /  |          
+                         _______  $$ |____    ______  $$/   ______  
+                        /       | $$      \  /      \ /  | /      \ 
+                        /$$$$$$$/ $$$$$$$  | $$$$$$  |$$ |/$$$$$$  |
+                        $$ |      $$ |  $$ | /    $$ |$$ |$$ |  $$/ 
+                        $$ \_____  $$ |  $$ |/$$$$$$$ |$$ |$$ |      
+                        $$      | $$ |  $$ |$$    $$ |$$ |$$ |      
+                        $$$$$$$/  $$/   $$/  $$$$$$$/ $$/ $$/       
+                                            
+                                        
                        _________________
                      /                /|
                     /                / |

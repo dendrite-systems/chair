@@ -3,15 +3,16 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
 interface Script {
-  id: string;
-  name: string;
-  author: string;
-  description: string;
-  script: string;
-  version: string;
-}
-
-
+    id: string;
+    name: string;
+    author: string;
+    description: string;
+    script: string;
+    version: string;
+    input_json_schema: string;
+    output_json_schema: string;
+  }
+  
 interface ScriptsContextType {
   scripts: Script[];
   loading: boolean;
