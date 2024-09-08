@@ -1,70 +1,80 @@
-import ast
-import sys
-from io import StringIO
+import dendrite_sdk
+import os
+from dotenv import load_dotenv
 
 
-class Sandbox:
+class PythonSandbox:
     def __init__(self):
+        # Load environment variables from .env file
+        load_dotenv("server/.env")
+
         self.globals = {
-            "__builtins__": {
-                "print": print,
-                "len": len,
-                "range": range,
-                "sum": sum,
-                "min": min,
-                "max": max,
-                "list": list,
-                "dict": dict,
-                "set": set,
-                "int": int,
-                "float": float,
-                "str": str,
-                "bool": bool,
-            }
+            "dendrite_sdk": dendrite_sdk,
+            "os": os,
         }
 
-    def check_ast(self, code):
-        tree = ast.parse(code)
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
-                raise ValueError("Import statements are not allowed")
-            elif isinstance(node, ast.Call):
-                func = node.func
-                if isinstance(func, ast.Attribute) and func.attr in [
-                    "__import__",
-                    "eval",
-                    "exec",
-                ]:
-                    raise ValueError(f"Function '{func.attr}' is not allowed")
-        return tree
+        # Explicitly load required environment variables
+        env_vars = [
+            "OPENAI_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "BROWSERBASE_API_KEY",
+            "BROWSERBASE_CONNECTION_URI",
+            "BROWSERBASE_PROJECT_ID",
+            "DENDRITE_API_KEY",
+        ]
 
-    def run_code(self, code):
+        for var in env_vars:
+            value = os.getenv(var)
+            if value:
+                self.globals[var] = value
+            else:
+                print(f"Warning: {var} not found in environment variables")
+
+        # Set Dendrite API key
+        if "DENDRITE_API_KEY" in self.globals:
+            dendrite_sdk.api_key = self.globals["DENDRITE_API_KEY"]
+
+    def execute_with_output(self, code):
+        output = []
+
+        def _print(*args, **kwargs):
+            output.append(" ".join(map(str, args)))
+
         try:
-            self.check_ast(code)
-            old_stdout = sys.stdout
-            redirected_output = sys.stdout = StringIO()
+            self.globals["print"] = _print
             exec(code, self.globals)
-            sys.stdout = old_stdout
-            return redirected_output.getvalue()
+            return "\n".join(output)
         except Exception as e:
             return f"Error: {str(e)}"
 
 
-sandbox = Sandbox()
-llm_generated_code = """
-import asyncio
-from dendrite_sdk import DendriteBrowser
+# # Example usage
+# if __name__ == "__main__":
+#     sandbox = PythonSandbox()
 
+#     # Test with allowed module
+#     result = sandbox.execute_with_output(
+#         """
+# import asyncio
+# from dendrite_sdk import DendriteBrowser
 
-async def get_wishlist_count():
-    async with DendriteBrowser() as browser:
-        page = await browser.goto("https://fishards.com")
-        wishlist_count = await page.ask("What is the current wishlist count on this page?")
-        print(wishlist_count.return_data)
+# async def get_wishlist_count():
+#     async with DendriteBrowser() as browser:
+#         page = await browser.goto("https://fishards.com")
+#         await page.scroll(0, 300)  # Scroll down by 300 pixels
+#         wishlist_count = await page.ask("What is the current wishlist count on this page?")
+#         print(wishlist_count.return_data)
 
+# asyncio.run(get_wishlist_count())
+# """
+#     )
+#     print(result)
 
-asyncio.run(get_wishlist_count())
-"""
-
-output = sandbox.run_code(llm_generated_code)
-print("Sandbox output:", output)
+#     # Test with any module (no restrictions)
+#     result = sandbox.execute_with_output(
+#         """
+# import os
+# print("Current working directory:", os.getcwd())
+# """
+#     )
+#     print(result)

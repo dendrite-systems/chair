@@ -114,6 +114,10 @@ async def find_recipe(recipe: str, preferences: str):
         return generated_recipe
 ```
 
+You can always access the playwright AsyncPage object with `playwright_page = await dendrite.playwright_page`.
+
+To scroll a bit you can use `await page.scroll(0, 300)`.
+
 Finally, let's take a look at authentication.
 
 The Dendrite SDK uses a Chrome extension called Dendrite Vault to securely authenticate websites. This mirrors the access you have in your local browser. Here's how it works:
@@ -134,6 +138,7 @@ from dendrite_sdk import DendriteBrowser
 async def instagram_example():
     # Initiate the Dendrite Browser
     async with DendriteBrowser() as browser:
+    
         # Authenticate with Instagram
         await browser.authenticate("instagram.com")
         

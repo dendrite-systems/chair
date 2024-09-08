@@ -25,7 +25,7 @@ def extract_python_code(llm_output):
         return None
 
 
-def extract_json(llm_output):
+def extract_name_and_description(llm_output):
     """
     Extracts JSON from an LLM output and returns a dictionary with name and description.
 
