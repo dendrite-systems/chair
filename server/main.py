@@ -4,6 +4,7 @@ import cv2
 from flask_cors import CORS
 import threading, queue
 import base64
+import json
 
 from lm.lm_utils import start_agent_prompt_file_response_thread
 
@@ -63,7 +64,7 @@ def get_scripts_list():
     scripts = os.listdir(script_dir)
     return jsonify({"scripts": scripts}), 200
 
-@app.route('/get_script', methods=['GET'])
+@app.route('/get_script_details', methods=['GET'])
 def get_script():
     # Get the requested script
     script_name = request.args.get('script_name')
@@ -72,10 +73,12 @@ def get_script():
     if not os.path.exists(script_path):
         return jsonify({"error": "Script not found"}), 404
     
-    with open(script_path, 'r') as f:
-        script = f.read()
+    with open(f"{script_path}/config.json", 'r') as f:
+        script_config = json.load(f)
+    with open(f"{script_path}/script.py", 'r') as f:
+        script_text = f.read()
     
-    return jsonify({"script": script}), 200
+    return jsonify({"config": script_config, "script": script_text}), 200
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
