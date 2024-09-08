@@ -7,7 +7,7 @@ import base64
 import json
 
 from lm.lm_utils import start_agent_prompt_file_response_thread
-from server.code_execution.Sandbox import PythonSandbox
+# from code_execution.Sandbox import PythonSandbox
 
 video_save_dir = "video_cache"
 script_dir = "parsed_scripts"
@@ -57,7 +57,7 @@ def upload_video():
         return jsonify({"error": "No video file provided"}), 400
 
     # Start a thread that will prompt the agent with a file response
-    # start_agent_prompt_file_response_thread(filename, file_path)
+    start_agent_prompt_file_response_thread(filename, file_path)
     print(request.json)
     
     return jsonify({"message": "Video uploaded successfully", "filename": filename}), 200
@@ -95,7 +95,9 @@ def run_script():
     if not os.path.exists(script_path):
         return jsonify({"error": "Script not found"}), 404
     else:
-        sandbox = PythonSandbox()
+        # sandbox = PythonSandbox()
+        sandbox = None
+        raise NotImplementedError
 
         # Read the script content
         with open(os.path.join(script_path, "script.py"), "r") as f:

@@ -89,7 +89,6 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 async function uploadVideo(base64String) {
-  console.log('Uploading video to:', url);
   const url = 'http://localhost:5050/upload_video';
   console.log('Uploading video to:', url);
   
@@ -119,17 +118,5 @@ async function uploadVideo(base64String) {
     throw error;
   }
 }
-
-
-// Usage
-const base64Video = 'your-base64-encoded-video-string';
-console.log('Uploading video');
-uploadVideo(base64Video)
-  .then(result => {
-    console.log('Uploaded file:', result.filename);
-  })
-  .catch(error => {
-    console.error('Upload failed:', error);
-  });
 
 

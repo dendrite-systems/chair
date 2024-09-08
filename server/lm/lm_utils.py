@@ -4,7 +4,7 @@ import json
 
 from lm.api import ConversationAgent
 from lm.constants import CODE_PROMPT, ANNOTATE_PROMPT
-from server.lm.parse_code_output import (
+from lm.parse_code_output import (
     extract_python_code,
     extract_name_and_description,
 )
