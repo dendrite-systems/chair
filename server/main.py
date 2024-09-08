@@ -1,6 +1,6 @@
 from flask import Flask, Response, request, jsonify
 import os, time
-import cv2
+# import cv2
 from flask_cors import CORS
 import threading, queue
 import base64
@@ -120,7 +120,7 @@ def handle_exit():
     # handle cleanup here
     global stop_events
     print("Exiting")
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     for stop_event in stop_events:
         stop_event.set()
 

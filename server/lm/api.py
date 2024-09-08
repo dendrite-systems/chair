@@ -1,11 +1,11 @@
 import os
 from lm.tts import _TTS
-from constants import MODEL_LIBRARY
+from lm.constants import MODEL_LIBRARY
 
-if MODEL_LIBRARY == "OPENAI":
-    from models.gpt import GPTModel
-elif MODEL_LIBRARY == "GEMINI":
-    from models.gemini import GeminiModel
+if MODEL_LIBRARY == 'OPENAI':
+    from lm.models.gpt import GPTModel
+elif MODEL_LIBRARY == 'GEMINI':
+    from lm.models.gemini import GeminiModel
 else:
     raise ValueError("MODEL_LIBRARY must be either 'OPENAI' or 'GEMINI'")
 
