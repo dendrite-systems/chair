@@ -1,5 +1,6 @@
 // Wait for the endedRecording message from recording_screen.js
 chrome.runtime.onMessage.addListener((request) => {
+  console.log('onMessage', request);
   if (request.name !== 'endedRecording') {
     return;
   }

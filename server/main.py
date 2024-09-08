@@ -57,13 +57,10 @@ def upload_video():
         return jsonify({"error": "No video file provided"}), 400
 
     # Start a thread that will prompt the agent with a file response
-    start_agent_prompt_file_response_thread(filename, file_path)
-
-    return (
-        jsonify({"message": "Video uploaded successfully", "filename": filename}),
-        200,
-    )
-
+    # start_agent_prompt_file_response_thread(filename, file_path)
+    print(request.json)
+    
+    return jsonify({"message": "Video uploaded successfully", "filename": filename}), 200
 
 @app.route("/get_scripts_list", methods=["GET"])
 def get_scripts_list():
