@@ -4,7 +4,6 @@ IDLE_RESPONSE_TIME = 7
 
 CODE_PROMPT = """You are an AI agent that takes a screen recording of a user showing you how to complete an automated task on the web.=======
 
-
 Your goal is to look at the screen recording and generate a python script that uses the Dendrite SDK. Dendrite is an SDK that uses natural language to automate actions on the web.
 
 Here is an example of how to use the Dendrite SDK:
@@ -154,9 +153,26 @@ asyncio.run(instagram_example())
 
 Now, based of the video recording, you will generate a python script that can be used to automate the task.
 
-Output it in a code block. like this:
+Output it in a python code block. like this:
 
 ```python
 <your script here>
 ```
 """
+
+ANNOTATE_PROMPT = """Look at the script below and output a json object that contains a name and description for the entire script with backticks. like this:
+
+```json
+{{
+    "name": "name of the script",
+    "description": "description of the script"
+}}
+```
+
+Here is the script:
+
+```python   
+{{SCRIPT}}
+```
+
+Output the json now:"""

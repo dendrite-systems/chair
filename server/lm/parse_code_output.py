@@ -3,7 +3,7 @@ import re
 
 def extract_python_code(llm_output):
     """
-    Extracts Python code from an LLM output that contains the CODE_PROMPT.
+    Extracts Python code from an LLM output.
 
     Args:
     llm_output (str): The output from the LLM containing the Python code.
@@ -22,4 +22,41 @@ def extract_python_code(llm_output):
         return match.group(1).strip()
     else:
         # Return None if no Python code block is found
+        return None
+
+
+def extract_json(llm_output):
+    """
+    Extracts JSON from an LLM output and returns a dictionary with name and description.
+
+    Args:
+    llm_output (str): The output from the LLM containing the JSON.
+
+    Returns:
+    dict: A dictionary with 'name' and 'description' keys, or None if no JSON is found.
+    """
+    # Pattern to match JSON block
+    pattern = r"```json\n(.*?)```"
+
+    # Use re.DOTALL flag to match across multiple lines
+    match = re.search(pattern, llm_output, re.DOTALL)
+
+    if match:
+        # Extract the content inside the JSON block
+        json_str = match.group(1).strip()
+        # Parse the JSON string into a Python dictionary
+        import json
+
+        try:
+            json_dict = json.loads(json_str)
+            # Return a dictionary with name and description
+            return {
+                "name": json_dict.get("name"),
+                "description": json_dict.get("description"),
+            }
+        except json.JSONDecodeError:
+            # Return None if JSON parsing fails
+            return None
+    else:
+        # Return None if no JSON block is found
         return None
