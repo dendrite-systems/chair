@@ -1,10 +1,19 @@
 from flask import Flask, request, jsonify
 import os, time
+<<<<<<< HEAD
+=======
+# import cv2
+>>>>>>> a7a58cd571163e83781bf5563d513046a2fac427
 from flask_cors import CORS
 import base64
 import json
 
+<<<<<<< HEAD
 from server.code_execution.Sandbox import PythonSandbox
+=======
+from lm.lm_utils import start_agent_prompt_file_response_thread
+# from code_execution.Sandbox import PythonSandbox
+>>>>>>> a7a58cd571163e83781bf5563d513046a2fac427
 
 video_save_dir = "video_cache"
 script_dir = "parsed_scripts"
@@ -55,7 +64,7 @@ def upload_video():
         return jsonify({"error": "No video file provided"}), 400
 
     # Start a thread that will prompt the agent with a file response
-    # start_agent_prompt_file_response_thread(filename, file_path)
+    start_agent_prompt_file_response_thread(filename, file_path)
     print(request.json)
 
     return (
@@ -104,7 +113,9 @@ def run_script():
     if not os.path.exists(script_path):
         return jsonify({"error": "Script not found"}), 404
     else:
-        sandbox = PythonSandbox()
+        # sandbox = PythonSandbox()
+        sandbox = None
+        raise NotImplementedError
 
         # Read the script content
         with open(os.path.join(script_path, "script.py"), "r") as f:
@@ -126,7 +137,6 @@ def index():
 
 
 def handle_exit():
-    # handle cleanup here
     global stop_events
     print("Exiting")
     for stop_event in stop_events:

@@ -6,6 +6,4 @@ Flask-SocketIO==5.3.6
 Flask-Sockets==0.2.1
 Flask-SQLAlchemy==3.0.3
 Flask-WTF==1.2.1
-opencv-contrib-python==4.8.1.78
-opencv-python==4.9.0.80
 google-generativeai
