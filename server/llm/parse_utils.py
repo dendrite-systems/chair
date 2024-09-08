@@ -27,13 +27,15 @@ def extract_python_code(llm_output):
 
 def extract_name_and_description(llm_output):
     """
-    Extracts JSON from an LLM output and returns a dictionary with name and description.
+    Extracts JSON from an LLM output and returns a dictionary with name, description,
+    input_json_schema, and output_json_schema.
 
     Args:
     llm_output (str): The output from the LLM containing the JSON.
 
     Returns:
-    dict: A dictionary with 'name' and 'description' keys, or None if no JSON is found.
+    dict: A dictionary with 'name', 'description', 'input_json_schema', and 'output_json_schema' keys,
+          or None if no JSON is found or parsing fails.
     """
     # Pattern to match JSON block
     pattern = r"```json\n(.*?)```"
@@ -49,10 +51,12 @@ def extract_name_and_description(llm_output):
 
         try:
             json_dict = json.loads(json_str)
-            # Return a dictionary with name and description
+            # Return a dictionary with all required fields
             return {
                 "name": json_dict.get("name"),
                 "description": json_dict.get("description"),
+                "input_json_schema": json_dict.get("input_json_schema"),
+                "output_json_schema": json_dict.get("output_json_schema"),
             }
         except json.JSONDecodeError:
             # Return None if JSON parsing fails

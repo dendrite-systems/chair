@@ -1,8 +1,10 @@
+import pprint
+import asyncio
+import threading
 from flask import Flask, request, jsonify
 import os, time
 from flask_cors import CORS
 import base64
-from werkzeug.datastructures import FileStorage
 from io import BytesIO
 
 from code_execution.Sandbox import PythonSandbox
@@ -125,14 +127,32 @@ def run_script():
         return jsonify({"error": "Script not found"}), 404
 
     sandbox = PythonSandbox()
-    try:
-        sandbox.execute_with_output(script.script)
-        print("Script ran successfully")
-    except Exception as e:
-        print(f"Error running script: {e}")
-        return jsonify({"error": str(e)}), 500
 
-    return jsonify({"message": "Script running"}), 200
+    result = sandbox.execute_with_input_output(
+        script.script, request.json.get("input_data", {})
+    )
+
+    if isinstance(result, dict) and "output" in result and "result" in result:
+        return (
+            jsonify(
+                {
+                    "message": "Script execution completed",
+                    "output": result["output"],
+                    "result": result["result"],
+                }
+            ),
+            200,
+        )
+    else:
+        return (
+            jsonify(
+                {
+                    "message": "Script execution completed",
+                    "error": "Unexpected result format",
+                }
+            ),
+            500,
+        )
 
 
 # Example default route to check server is running
@@ -164,13 +184,13 @@ def test_upload_video():
     print(f"Test result: {response.get_json()}")
 
 
-def test_run_script(script_id="2aa3579a-753c-4c20-892b-b5d197e5b9e2"):
+def test_run_script(script_id="b229a4b1-636a-4c86-98e6-99bcc5368e14", input_data={}):
     app.logger.info("Testing script execution")
 
     with app.test_client() as client:
         response = client.post(
             "/run_script",
-            json={"script_id": script_id},
+            json={"script_id": script_id, "input_data": input_data},
             content_type="application/json",
         )
 
@@ -179,11 +199,14 @@ def test_run_script(script_id="2aa3579a-753c-4c20-892b-b5d197e5b9e2"):
 
 if __name__ == "__main__":
     try:
-        app.run(host="0.0.0.0", port=5050, debug=False)
+        # app.run(host="0.0.0.0", port=5050, debug=False)
 
         # print("Starting upload test")
         # test_upload_video()
-        # test_run_script()
+        test_run_script(
+            script_id="47a8a887-d212-47c3-9b5d-7c19a1597667",
+            input_data={"github_url": "https://github.com/charlesmaddock/fishards"},
+        )
     except Exception as e:
         print(e)
     finally:

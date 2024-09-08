@@ -1,19 +1,29 @@
 import dendrite_sdk
 import os
+import json
 from dotenv import load_dotenv
+import asyncio
+import logging
 
 
 class PythonSandbox:
     def __init__(self):
-        # Load environment variables from .env file
+        # Set up logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        )
+        self.logger = logging.getLogger(__name__)
+
         load_dotenv("server/.env")
+        self.logger.info("Environment variables loaded")
 
         self.globals = {
             "dendrite_sdk": dendrite_sdk,
             "os": os,
+            "asyncio": asyncio,
         }
 
-        # Explicitly load required environment variables
         env_vars = [
             "OPENAI_API_KEY",
             "ANTHROPIC_API_KEY",
@@ -27,18 +37,27 @@ class PythonSandbox:
             value = os.getenv(var)
             if value:
                 self.globals[var] = value
+                self.logger.debug(f"Environment variable {var} loaded")
             else:
-                print(f"Warning: {var} not found in environment variables")
+                self.logger.warning(f"Environment variable {var} not found")
 
-    def execute_with_output(self, code):
+    def execute_with_input_output(self, code, input_json):
+        self.logger.info("Executing code in sandbox")
         output = []
+
+        self.logger.info(f"Code to execute: {code} with input: {input_json}")
 
         def _print(*args, **kwargs):
             output.append(" ".join(map(str, args)))
 
         try:
             self.globals["print"] = _print
+            self.globals["input_data"] = input_json
             exec(code, self.globals)
-            return "\n".join(output)
+            result = self.globals.get("result", None)
+
+            print(f"Code execution completed successfully, results: {result}")
+            return {"output": "\n".join(output), "result": result}
         except Exception as e:
-            return f"Error: {str(e)}"
+            self.logger.error(f"Error during code execution: {str(e)}", exc_info=True)
+            return {"error": str(e)}

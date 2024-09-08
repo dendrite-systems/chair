@@ -1,11 +1,12 @@
 import os
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from typing import Optional
+from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 import uuid
 import logging
 from datetime import datetime, UTC
+import json
 
 # Load environment variables
 load_dotenv()
@@ -32,7 +33,10 @@ class Script(BaseModel):
     author: str = "AI Generated"
     description: str = ""
     script: str
+    recording_base64: str
     version: str = "1.0"
+    input_json_schema: str
+    output_json_schema: str
 
 
 # Function to create a new script
@@ -40,6 +44,9 @@ def create_script(
     name: str,
     script: str,
     user_id: str,
+    recording_base64: str,
+    input_json_schema: str,
+    output_json_schema: str,
     description: str = "",
     author: str = "AI Generated",
     version: str = "1.0",
@@ -51,14 +58,18 @@ def create_script(
         description=description,
         author=author,
         version=version,
+        recording_base64=recording_base64,
+        input_json_schema=input_json_schema,
+        output_json_schema=output_json_schema,
     )
     try:
-        logger.info(f"Attempting to insert script: {script_data.model_dump()}")
+        logger.info(
+            f"Attempting to insert script with id: {script_data.script_id} and name {script_data.name}"
+        )
         # Convert the model to a dictionary and format the datetime
         insert_data = script_data.model_dump()
         insert_data["created_at"] = insert_data["created_at"].isoformat()
         result = script_collection.insert(insert_data).execute()
-        logger.info(f"Script inserted successfully: {result.data}")
         return Script(**result.data[0])
     except Exception as e:
         logger.error(f"Error inserting script: {str(e)}")
@@ -73,7 +84,9 @@ def get_all_scripts():
 # Function to get a specific script by id
 def get_script_by_id(script_id: str) -> Optional[Script]:
     result = script_collection.select("*").eq("script_id", script_id).single().execute()
-    return Script(**result.data) if result.data else None
+    if result.data:
+        return Script(**result.data)
+    return None
 
 
 # Function to update a script
