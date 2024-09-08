@@ -7,8 +7,8 @@ from flask_cors import CORS
 import base64
 from io import BytesIO
 
-# from code_execution.Sandbox import PythonSandbox
-# from llm.llm_utils import create_dendrite_script_from_video
+from code_execution.Sandbox import PythonSandbox
+from llm.llm_utils import create_dendrite_script_from_video
 from db.db import get_all_scripts, get_script_by_id
 
 video_save_dir = "video_cache"
@@ -86,15 +86,16 @@ def get_scripts_list():
     # print(scripts[0].keys())
     script_list = [
         {
-            "id": script["script_id"], 
+            "id": script["script_id"],
             "name": script["name"],
             "author": script["author"],
             "script": script["script"],
             "version": script["version"],
             "description": script["description"],
             "input_json_schema": script["input_json_schema"],
-            "output_json_schema": script["output_json_schema"]
-        } for script in scripts
+            "output_json_schema": script["output_json_schema"],
+        }
+        for script in scripts
     ]
     return jsonify({"scripts": script_list}), 200
 
@@ -103,6 +104,7 @@ def get_scripts_list():
 def get_script_details():
     pass
     # not used
+
 
 @app.route("/run_script", methods=["POST"])
 def run_script():
@@ -169,10 +171,10 @@ def test_run_script(script_id="b229a4b1-636a-4c86-98e6-99bcc5368e14", input_data
 
 if __name__ == "__main__":
     try:
-        # app.run(host="0.0.0.0", port=5050, debug=False)
+        app.run(host="0.0.0.0", port=5050, debug=False)
 
         # print("Starting upload test")
-        test_upload_video()
+        # test_upload_video()
         # test_run_script(
         #     script_id="ccfa7cc8-7500-4231-aeb2-a390e812e71f",
         #     input_data={"github_url": "https://github.com/charlesmaddock/fishards"},
