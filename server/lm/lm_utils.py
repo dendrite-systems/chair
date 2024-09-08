@@ -11,6 +11,7 @@ def start_agent_prompt_file_response_thread(file_name, file_path):
         print("Prompting agent with file response")
         response = agent.get_prompt_response_with_file(INITIAL_PROMPT, file_name, file_path)
         print(response)
+        # parse
     thread = threading.Thread(target=agent_prompt_file_response)
     thread.start()
 

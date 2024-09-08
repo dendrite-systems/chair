@@ -8,6 +8,7 @@ import base64
 from lm.lm_utils import start_agent_prompt_file_response_thread
 
 video_save_dir = 'video_cache'
+script_dir = 'parsed_scripts'
 
 stop_events = []
 threads = {}
@@ -56,6 +57,39 @@ def upload_video():
     
     return jsonify({"message": "Video uploaded successfully", "filename": filename}), 200
 
+@app.route('/get_scripts_list', methods=['GET'])
+def get_scripts_list():
+    # Get the list of scripts
+    scripts = os.listdir(script_dir)
+    return jsonify({"scripts": scripts}), 200
+
+@app.route('/get_script', methods=['GET'])
+def get_script():
+    # Get the requested script
+    script_name = request.args.get('script_name')
+    script_path = os.path.join(script_dir, script_name)
+    
+    if not os.path.exists(script_path):
+        return jsonify({"error": "Script not found"}), 404
+    
+    with open(script_path, 'r') as f:
+        script = f.read()
+    
+    return jsonify({"script": script}), 200
+
+@app.route('/run_script', methods=['POST'])
+def run_script():
+    # Get the script to run
+    script_name = request.json.get('script_name')
+    script_path = os.path.join(script_dir, script_name)
+    
+    if not os.path.exists(script_path):
+        return jsonify({"error": "Script not found"}), 404
+    else:
+        # run the script
+        pass
+    
+    return jsonify({"message": "Script running"}), 200
 
 # Example default route to check server is running
 @app.route('/')
