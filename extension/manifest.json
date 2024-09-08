@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "Screenshot Taker",
+  "version": "1.0",
+  "description": "Takes a screenshot when a button is pressed",
+  "permissions": ["activeTab", "<all_urls>"],
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_title": "Take Screenshot"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  }
+}
+
+// background.js
+chrome.browserAction.onClicked.addListener(function(tab) {
+  chrome.tabs.captureVisibleTab(null, {}, function(dataUrl) {
+    const link = document.createElement('a');
+    link.download = 'screenshot.png';
+    link.href = dataUrl;
+    link.click();
+  });
+});
