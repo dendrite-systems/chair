@@ -7,8 +7,8 @@ from flask_cors import CORS
 import base64
 from io import BytesIO
 
-from code_execution.Sandbox import PythonSandbox
-from llm.llm_utils import create_dendrite_script_from_video
+# from code_execution.Sandbox import PythonSandbox
+# from llm.llm_utils import create_dendrite_script_from_video
 from db.db import get_all_scripts, get_script_by_id
 
 video_save_dir = "video_cache"
@@ -82,37 +82,27 @@ def upload_video():
 
 @app.route("/get_scripts_list", methods=["GET"])
 def get_scripts_list():
-    scripts = get_all_scripts()
+    scripts = get_all_scripts().data
+    # print(scripts[0].keys())
     script_list = [
-        {"id": script.script_id, "name": script.name} for script in scripts.data
+        {
+            "id": script["script_id"], 
+            "name": script["name"],
+            "author": script["author"],
+            "script": script["script"],
+            "version": script["version"],
+            "description": script["description"],
+            "input_json_schema": script["input_json_schema"],
+            "output_json_schema": script["output_json_schema"]
+        } for script in scripts
     ]
     return jsonify({"scripts": script_list}), 200
 
 
 @app.route("/get_script_details", methods=["GET"])
 def get_script_details():
-    script_id = request.args.get("script_id")
-    if script_id is None:
-        return jsonify({"error": "Script ID not provided"}), 400
-
-    script = get_script_by_id(script_id)
-    if script is None:
-        return jsonify({"error": "Script not found"}), 404
-
-    return (
-        jsonify(
-            {
-                "script_id": script.script_id,
-                "name": script.name,
-                "description": script.description,
-                "code": script.script,
-                "author": script.author,
-                "version": script.version,
-            }
-        ),
-        200,
-    )
-
+    pass
+    # not used
 
 @app.route("/run_script", methods=["POST"])
 def run_script():

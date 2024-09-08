@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Box, Typography, Slider, TextField, FormControlLabel, Switch, Button, IconButton } from '@mui/material';
 
 import StartIcon from '@mui/icons-material/PlayArrow'; // Use the icon you need
@@ -8,15 +8,17 @@ import Codeblock from './CodeBlock'
 
 import axios from 'axios';
 
-const pythonCode = `def hello_world():
-    print("Hello, world!")
-
-hello_world()
-`;
+import { ScriptsContext } from '../ScriptsContext';
 
 const RightPanel: React.FC = () => {
 
-    var mode: string = 'script';
+    const context = useContext(ScriptsContext);
+    if (!context) {
+      return <div>Context not found</div>;
+    }
+  
+    const { curScript, scripts, loading, error, reload, chooseCurScript, runScript } = context;
+
     return (
         <Box
             className="right-panel"
@@ -26,13 +28,13 @@ const RightPanel: React.FC = () => {
             padding="30px 30px 0 30px"
         >
             {
-                mode === 'script' &&
+                curScript !== null ? 
                 <>
                     <Typography variant="h5" color="secondary" gutterBottom>
-                        Authenticate With Instagram
+                        {curScript.name}
                     </Typography>
                     <Typography variant="body1" color="secondary" gutterBottom>
-                        Helps authenticate with instagram, you only need to type in the credentials!
+                        {curScript.description}
                     </Typography>
                     <div className='border-box'
                         style={{
@@ -41,7 +43,7 @@ const RightPanel: React.FC = () => {
                             margin: "10px 0"
                         }}
                     />
-                    <Codeblock code={pythonCode} />
+                    <Codeblock code={curScript.script} />
                     <div
                         style={{
                             padding: "20px 10px",
@@ -64,6 +66,11 @@ const RightPanel: React.FC = () => {
                                     backgroundColor: '#ff9800'
                                 },
                             }}
+                            onClick = {
+                                () => {
+                                    runScript(curScript.id);
+                                }
+                            }
                         >
                             Start
                         </Button>
@@ -83,15 +90,13 @@ const RightPanel: React.FC = () => {
                                     backgroundColor: '#e0e0e0', // Slightly darker grey on hover
                                 },
                             }}
+                            onClick={()=>{reload();}}
                         >
                             Refresh
                         </Button>
                     </div>
                 </>
-            }
-
-            {
-                mode === 'intro' &&
+                :
                 <>
                     <Typography variant="h5" color="secondary" gutterBottom>
                         Welcome to Smart Chair! Find yours now.

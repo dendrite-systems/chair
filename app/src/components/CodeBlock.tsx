@@ -12,13 +12,14 @@ interface CodeBlockProps {
 const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
   useEffect(() => {
     Prism.highlightAll(); // Highlight code on component mount
-  }, []);
+  }, [code]);
 
   return (
     <pre style={{
         height:"450px",
         overflow:"scroll",
-        borderRadius: "10px"
+        borderRadius: "10px",
+        fontSize: "14px"
     }}>
       <code className="language-python">{code}</code>
     </pre>

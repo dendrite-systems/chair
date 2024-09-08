@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import axios from 'axios';
 
-
-const data = [
-  { name: 'Project 1', author: 'Author A', description: 'Description A' },
-  { name: 'Project 2', author: 'Author B', description: 'Description B' },
-  { name: 'Project 3', author: 'Author C', description: 'Description C' },
-];
+import { ScriptsContext } from '../ScriptsContext';
 
 const LeftPanel: React.FC = () => {
+
+  const context = useContext(ScriptsContext);
+  if (!context) {
+    return <div>Context not found</div>;
+  }
+
+  const { scripts, loading, error, reload, chooseCurScript } = context;
+
   return (
     <Box 
       display="flex" 
@@ -21,22 +25,24 @@ const LeftPanel: React.FC = () => {
     >
       <TableContainer>
         <Table>
-          <TableHead>
+          <TableHead onClick={()=>{chooseCurScript(-1)}}
+          >
             <TableRow>
               <TableCell className='table-header-cell'>Name </TableCell>
+              <TableCell className='table-header-cell'>Version</TableCell>
               <TableCell className='table-header-cell'>Author</TableCell>
               <TableCell className='table-header-cell'>Description</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row, index) => (
-              <TableRow 
-                key={index}
-                className='table-content-row'
+            {scripts.map((script, index) => (
+              <TableRow key={index} className='table-content-row'
+                onClick={()=>{chooseCurScript(index)}}
               >
-                <TableCell className='table-content-cell'>{row.name}</TableCell>
-                <TableCell className='table-content-cell'>{row.author}</TableCell>
-                <TableCell className='table-content-cell'>{row.description}</TableCell>
+                <TableCell className='table-content-cell'>{script.name}</TableCell>
+                <TableCell className='table-content-cell'>{script.version}</TableCell>
+                <TableCell className='table-content-cell'>{script.author}</TableCell>
+                <TableCell className='table-content-cell'>{script.description}</TableCell>
               </TableRow>
             ))}
           </TableBody>
