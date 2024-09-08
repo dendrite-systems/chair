@@ -51,3 +51,26 @@ body {
     border-left: 2px solid #858585 !important;
     border-top: 2px solid #858585 !important;
   }
+
+  .shade-background {
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 99;
+    height: 120vh;
+    width: 120vw;
+    position: fixed;
+    top: -10vh;
+    left: -10vw;
+  }
+
+  .input-window {
+    background-color: #eeeeee;
+    border-radius: 10px;
+    padding: 20px;
+    width: 50%;
+    height: 500px;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+  }

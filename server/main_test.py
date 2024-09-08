@@ -7,7 +7,7 @@ from flask_cors import CORS
 import base64
 from io import BytesIO
 
-from llm.llm_utils import create_dendrite_script_from_video
+# from llm.llm_utils import create_dendrite_script_from_video
 from db.db import get_all_scripts, get_script_by_id
 
 video_save_dir = "video_cache"
@@ -137,7 +137,8 @@ def run_script():
     if script is None:
         return jsonify({"error": "Script not found"}), 404
 
-    print("Running:", script.data.keys())
+    print("Input:", request.json.get("input_data", {}))
+    
     return jsonify({"ok": "ok"}), 200
 
 # Example default route to check server is running

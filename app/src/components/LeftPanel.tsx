@@ -20,8 +20,9 @@ const LeftPanel: React.FC = () => {
       justifyContent="flex-start"
       flexDirection="column"
       alignItems="center" 
-      height="70vh"
+      height="80vh"
       padding="16px"
+      overflow={'scroll'}
     >
       <TableContainer>
         <Table>
