@@ -1,0 +1,8 @@
+Flask==3.0.2
+Flask-Cors==3.0.8
+Flask-Login==0.6.3
+Flask-RESTful==0.3.10
+Flask-SocketIO==5.3.6
+Flask-Sockets==0.2.1
+Flask-SQLAlchemy==3.0.3
+Flask-WTF==1.2.1
